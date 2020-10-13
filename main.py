@@ -6,18 +6,12 @@ import gamestate
 import playerstate
 import playerhistory
 import drawer
+import sensor
 
-# ===== Sensors =====
-
-# looks into game state and player state to determine sensor state
-
-sensor_state = 0
-
-# ===== Game Loop =====
-
-game1 = gamestate.GameState(7,9,8)
-player1 = playerstate.PlayerState(3,5)
+game1 = gamestate.GameState(7,12,8)
+player1 = playerstate.PlayerState(3,8)
 player1hist = playerhistory.PlayerHistory(20)
+player1sensor = sensor.GetSensorState(game1,player1)
 maindrawer = drawer.Drawer(game1)
 
 # initialize pygame
@@ -34,11 +28,16 @@ temp_left_down = 0 # temp for testing
 temp_right_down = 0 # temp for testing
 temp_action_table = [1,2,0,1] # 0, 1 or 2 (left, center, right) # temp for testing
 
+# QTable[state][action]
+QTable = [[0 for j in range(3)] for i in range(sensor.total_states)]
+learning_rate = 0.2 # parameter that can be tweaked
+discount_factor = 0.8 # parameter that can be tweaked
+
 running = True
 while running:
     time_bank += clock.tick()
     while time_bank >= state_delay:
-        state_copy = sensor_state # for updating Q-value later (store in an array for multiple players)
+        state_copy = player1sensor # for updating Q-value later (store in an array for multiple players)
         
         # get action using epsilon-greedy, softmax, etc.
         temp_action = temp_action_table[2*temp_left_down + temp_right_down]
@@ -50,9 +49,11 @@ while running:
         
         game1.UpdateGame() # done once per loop
         
-        # make sure to update sensor_state
-        
-        # Q[state_copy,action] += ... use sensor_state and reward to update Q value
+        # make sure to update sensor (and get new state)
+        player1sensor = sensor.GetSensorState(game1,player1)
+
+        TD = reward + discount_factor*max(QTable[player1sensor]) - QTable[state_copy][temp_action]
+        QTable[state_copy][temp_action] += learning_rate*TD # update Q value
         
         # can repeat the above in a loop to update the Q-value for each player
 

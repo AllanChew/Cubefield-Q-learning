@@ -8,6 +8,7 @@ class PlayerState:
     # updates player state and returns reward/punishment from applying action
     # looks into game state to determine reward/punishment
     def ApplyAction(self,gameref,action):
+        # update x values (player_x_step and player_x_col)
         self.player_x_step += action - 1
         moved_left_right = False
         old_player_x_col = self.player_x_col # used for checks below
@@ -19,17 +20,24 @@ class PlayerState:
             moved_left_right = True
             self.player_x_col = (self.player_x_col + 1) % gameref.x_col_blocks # move to right block
             self.player_x_step = 0 # at very left of right block
+
+        # update y value (player_y_row)
+        old_player_y_row = (gameref.generation_y_index + self.player_y_row_start) % gameref.y_row_blocks
+        moved_front_block = False
+        if gameref.game_y_step == 0:
+            moved_front_block = True
+            self.player_y_row = (gameref.generation_y_index + self.player_y_row_start - 1) % gameref.y_row_blocks # move to forward block
+        else:
+            self.player_y_row = old_player_y_row
         
-        current_y = (gameref.generation_y_index + self.player_y_row_start) % gameref.y_row_blocks
         if moved_left_right: # will move left/right
-            if gameref.block_array[self.player_x_col][current_y] == 1: # check block immediately left/right
+            if gameref.block_array[self.player_x_col][old_player_y_row] == 1: # check block immediately left/right
                 return -1 # hit left/right
-        if gameref.game_y_step == 0: # will move to forward block
-            current_y = (current_y + gameref.y_row_blocks - 1) % gameref.y_row_blocks
-            if gameref.block_array[old_player_x_col][current_y] == 1: # check block in front
+        if moved_front_block: # will move to forward block
+            if gameref.block_array[old_player_x_col][self.player_y_row] == 1: # check block in front
                 return -1 # hit front
-        if moved_left_right and gameref.game_y_step == 0: # will move diagonal
-            if gameref.block_array[self.player_x_col][current_y] == 1: # check new location
+        if moved_left_right and moved_front_block: # will move diagonal
+            if gameref.block_array[self.player_x_col][self.player_y_row] == 1: # check new location
                 return -1 # hit diagonal
         return 0
 

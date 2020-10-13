@@ -59,7 +59,7 @@ class GameState:
             if self.generation_y_index < 0:
                 self.generation_y_index = self.y_row_blocks - 1
             # generate new row
-            for i in range(self.x_col_blocks):
-                self.block_array[i][self.generation_y_index] = random.randint(0,1) # currently no checks for random generation
-            # self.GenerateNewRowAllan()
+            #for i in range(self.x_col_blocks):
+                #self.block_array[i][self.generation_y_index] = random.randint(0,1) # currently no checks for random generation
+            self.GenerateNewRowAllan()
 

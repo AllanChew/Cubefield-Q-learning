@@ -1,7 +1,10 @@
 import pygame
 import pygame.locals as GAME_GLOBALS
 import pygame.event as GAME_EVENTS
+
+# needed for epsilon-greedy and softmax (move into Q-learning module in the future)
 import random
+import math
 
 import gamestate
 import playerstate
@@ -20,12 +23,35 @@ state_delay = 50 # in ms
 #temp_right_down = 0 # temp for testing
 #temp_action_table = [1,2,0,1] # 0, 1 or 2 (left, center, right) # temp for testing
 #temp_action = temp_action_table[2*temp_left_down + temp_right_down]
-epsilon = 0.3 # pre-set epsilon value (explore 30% of the time randomly)
 
 # QTable[state][action]
 QTable = [[0 for j in range(3)] for i in range(sensor.total_states)]
 learning_rate = 0.2 # parameter that can be tweaked
 discount_factor = 0.8 # parameter that can be tweaked
+
+def GetGreedyAction(action_q_values):
+    return action_q_values.index(max(action_q_values))
+
+epsilon = 1 # starting value for epsilon (decreases over time)
+epsilon_offset = epsilon/100000 # 100000 game iterations
+def GetActionEpsilonGreedy(action_q_values):
+    global epsilon
+    if (epsilon < 0):
+        return GetGreedyAction(action_q_values)
+    ret_val = random.randint(0,2) if random.random() < epsilon else GetGreedyAction(action_q_values)
+    epsilon -= epsilon_offset
+    return ret_val
+
+temperature = 15 # starting value for temperature (decreases over time)
+min_temperature = 0.001 # minimum tempereature before using greedy
+anneal_mult = (min_temperature/temperature)**(1/100000) # 100000 game iterations
+def GetActionSoftmax(action_q_values):
+    global temperature
+    if temperature < min_temperature:
+        return GetGreedyAction(action_q_values)
+    ret_val = random.choices(range(len(action_q_values)), [math.exp(q/temperature) for q in action_q_values])[0]
+    temperature *= anneal_mult
+    return ret_val
 
 def main():
     global player1sensor
@@ -46,14 +72,9 @@ def main():
         while time_bank >= state_delay:
             state_copy = player1sensor # for updating Q-value later (store in an array for multiple players)
 
-            # Get action using epsilon-greedy
-            if random.random() < epsilon:
-                # explore
-                temp_action = random.randint(0, 2)
-            else:
-                # exploit
-                temp_action = QTable[state_copy].index(max(QTable[state_copy]))
-                # temp_action = temp_action_table[2*temp_left_down + temp_right_down]
+            #temp_action = GetActionSoftmax(QTable[state_copy]) # Get action using softmax
+            temp_action = GetActionEpsilonGreedy(QTable[state_copy]) # Get action using epsilon-greedy
+            #temp_action = temp_action_table[2*temp_left_down + temp_right_down] # Get action using input
 
             reward = player1.ApplyAction(game1, temp_action) # apply action and update player state
             player1hist.UpdateHistoryQueue(temp_action, reward)

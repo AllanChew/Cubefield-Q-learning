@@ -32,8 +32,9 @@ discount_factor = 0.8 # parameter that can be tweaked
 def GetGreedyAction(action_q_values):
     return action_q_values.index(max(action_q_values))
 
+training_iterations = 10000 # game iterations
 epsilon = 1 # starting value for epsilon (decreases over time)
-epsilon_offset = epsilon/100000 # 100000 game iterations
+epsilon_offset = epsilon/training_iterations
 def GetActionEpsilonGreedy(action_q_values):
     global epsilon
     if (epsilon < 0):
@@ -44,7 +45,7 @@ def GetActionEpsilonGreedy(action_q_values):
 
 temperature = 15 # starting value for temperature (decreases over time)
 min_temperature = 0.001 # minimum tempereature before using greedy
-anneal_mult = (min_temperature/temperature)**(1/100000) # 100000 game iterations
+anneal_mult = (min_temperature/temperature)**(1/training_iterations)
 def GetActionSoftmax(action_q_values):
     global temperature
     if temperature < min_temperature:
@@ -52,6 +53,16 @@ def GetActionSoftmax(action_q_values):
     ret_val = random.choices(range(len(action_q_values)), [math.exp(q/temperature) for q in action_q_values])[0]
     temperature *= anneal_mult
     return ret_val
+
+def RewardFunc1(action_result):
+    if action_result[2]:
+        return -1 # collided
+    return 0
+
+def RewardFunc2(action_result):
+    if action_result[2]:
+        return -8 # collided
+    return 1
 
 def main():
     global player1sensor
@@ -76,7 +87,7 @@ def main():
             temp_action = GetActionEpsilonGreedy(QTable[state_copy]) # Get action using epsilon-greedy
             #temp_action = temp_action_table[2*temp_left_down + temp_right_down] # Get action using input
 
-            reward = player1.ApplyAction(game1, temp_action) # apply action and update player state
+            reward = RewardFunc1(player1.ApplyAction(game1, temp_action)) # apply action and update player state
             player1hist.UpdateHistoryQueue(temp_action, reward)
 
             # can repeat the above in a loop for multiple players
@@ -102,10 +113,12 @@ def main():
                 if event.key == pygame.K_ESCAPE:
                     running = False
                 elif event.key == pygame.K_UP:
-                    if state_delay >= 20:
-                        state_delay -= 10
+                    if state_delay >= 6:
+                        state_delay -= 5
                 elif event.key == pygame.K_DOWN:
-                    state_delay += 10
+                    state_delay += 5
+                elif event.key == pygame.K_PRINT:
+                    pygame.image.save(window1,"screenshot.png")
                 #elif event.key == pygame.K_LEFT:
                     #temp_left_down = 1
                 #elif event.key == pygame.K_RIGHT:

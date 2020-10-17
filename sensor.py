@@ -1,7 +1,7 @@
 # sensorstate should be initialized to 4095 (nothing ahead)
 
 max_block_detection = 3
-total_states = 4096
+total_states = 64 # 4096 (old)
 
 # returns an integer in [0,3] and starting y index for double sensor
 def GetSingleSensor(gameref, x_start, y_start):
@@ -20,7 +20,7 @@ def GetDoubleSensor(gameref, x_start, y_start):
     return a*4 + b
 
 # returns an integer in [0,4095]
-def GetSensorState(gameref, playerref):
+def GetSensorStateOld(gameref, playerref):
     x_middle = playerref.player_x_col
     x_left = (x_middle + gameref.x_col_blocks - 1) % gameref.x_col_blocks
     x_right = (x_middle + 1) % gameref.x_col_blocks
@@ -31,3 +31,16 @@ def GetSensorState(gameref, playerref):
     right_sensor_val = GetDoubleSensor(gameref, x_right, y_sides)
     # print(left_sensor_val//4,left_sensor_val%4,middle_sensor_val//4,middle_sensor_val%4,right_sensor_val//4,right_sensor_val%4) # debug
     return left_sensor_val*16*16 + middle_sensor_val*16 + right_sensor_val
+
+# returns an integer in [0,63]
+def GetSensorState(gameref, playerref):
+    x_middle = playerref.player_x_col
+    x_left = (x_middle + gameref.x_col_blocks - 1) % gameref.x_col_blocks
+    x_right = (x_middle + 1) % gameref.x_col_blocks
+    y_sides = playerref.player_y_row
+    y_middle = (y_sides + gameref.y_row_blocks - 1) % gameref.y_row_blocks
+    left_sensor_val = GetSingleSensor(gameref, x_left, y_sides)[0]
+    middle_sensor_val = GetSingleSensor(gameref, x_middle, y_middle)[0]
+    right_sensor_val = GetSingleSensor(gameref, x_right, y_sides)[0]
+    # print(left_sensor_val,middle_sensor_val,right_sensor_val) # debug
+    return left_sensor_val*4*4 + middle_sensor_val*4 + right_sensor_val

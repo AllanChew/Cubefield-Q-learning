@@ -54,6 +54,9 @@ class GameState:
 
     def GenerateFlappyBird(self):
         print("GenerateFlappyBird: ", self.john_col_track)
+        # first clear the row
+        for i in range(self.x_col_blocks):
+            self.block_array[i][self.generation_y_index] = 0
         if self.john_col_track > 0:
             self.john_col_track += 1
             if self.john_col_track > 4:
@@ -61,13 +64,10 @@ class GameState:
             return
         self.john_col_track += 1
         print("Got here")
-        opening = random.randrange(0, self.x_col_blocks)
-        # first clear the row
         for i in range(self.x_col_blocks):
-            val = 1
-            if i == opening:
-                val = 0
-            self.block_array[i][self.generation_y_index] = val
+            self.block_array[i][self.generation_y_index] = 1
+        opening = random.randrange(0, self.x_col_blocks)
+        self.block_array[opening][self.generation_y_index] = 0
 
     def UpdateGame(self):
         # update y values

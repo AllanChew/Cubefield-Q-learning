@@ -1,15 +1,34 @@
 import random
 
-# example usage: GameState(7,9,8)
-class GameState:
-    game_y_step = 0
-    generation_y_index = 0
-    def __init__(self,x_col_blocks,y_row_blocks,steps_per_block):
-        self.x_col_blocks = x_col_blocks
-        self.y_row_blocks = y_row_blocks
-        self.steps_per_block = steps_per_block
-        self.block_array = [[0 for j in range(y_row_blocks)] for i in range(x_col_blocks)]
-    def CheckGenPoint(self, start_point, max_island_size): # helper function for GenerateNewRowAllan
+
+class Generator:
+    
+    def __init__(self, game):
+        self.game = game
+
+    # These properties real should use getters/setters but were lazy :)
+    @property
+    def block_array(self):
+        return self.game.block_array
+
+    @property
+    def generation_y_index(self):
+        return self.game.generation_y_index
+    
+    @property
+    def x_col_blocks(self):
+        return self.game.x_col_blocks
+
+    @property
+    def y_row_blocks(self):
+        return self.game.y_row_blocks
+
+    def generateNewRow(self):
+        raise NotImplementedError("Implement in sub class")
+
+class FloodFillGenerator(Generator):
+
+    def checkFloodFill(self, start_point, max_island_size): # helper function for GenerateNewRowAllan
         y_ignore = (start_point[1] + self.y_row_blocks - 1) % self.y_row_blocks # flood down from generation_y_index
         seen_list = [(0,0)]
         frontier = [(0,0)]
@@ -41,25 +60,13 @@ class GameState:
                     max_y = new_offset_y
                 frontier.append((new_offset_x, new_offset_y))
         return len(seen_list) <= max_island_size, max_x - min_x + 1, max_y - min_y + 1
-    def GenerateNewRowAllan(self):
+    
+    def generateNewRow(self):
         # first clear the row
         for i in range(self.x_col_blocks):
             self.block_array[i][self.generation_y_index] = 0
         # then generate
         for i in range(self.x_col_blocks):
-            island_valid,island_width,island_height = self.CheckGenPoint((i, self.generation_y_index), 3)
+            island_valid,island_width,island_height = self.checkFloodFill((i, self.generation_y_index), 3)
             if random.randint(0,2) > 0 and island_valid and (island_width < 3 or island_width <= island_height):
                 self.block_array[i][self.generation_y_index] = 1
-    def UpdateGame(self):
-        # update y values
-        self.game_y_step -= 1
-        if self.game_y_step < 0: # next block reached
-            self.game_y_step = self.steps_per_block - 1
-            self.generation_y_index -= 1
-            if self.generation_y_index < 0:
-                self.generation_y_index = self.y_row_blocks - 1
-            # generate new row
-            #for i in range(self.x_col_blocks):
-                #self.block_array[i][self.generation_y_index] = random.randint(0,1) # currently no checks for random generation
-            self.GenerateNewRowAllan()
-

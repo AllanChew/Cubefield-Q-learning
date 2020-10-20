@@ -1,19 +1,28 @@
 import pygame
 
+
 class Drawer:
     block_size = 50 # how many pixels wide for the square blocks
     line_thickness = 2 # how many pixels wide are the gridlines
     free_block_color = (255,255,255) # white
     solid_block_color = (125,125,125) # grey
     line_color = (0,0,0) # black
+
     def __init__(self, gameref):
         self.block_offset = self.line_thickness + self.block_size
         self.step_offset = self.block_offset/gameref.steps_per_block
         self.x_canvas_pixels = self.block_offset*gameref.x_col_blocks
         self.y_canvas_pixels = self.block_offset*gameref.y_row_blocks
+        self.gameref = gameref
+
+    def CreateSurface(self):
+        # last row is out of view due to generation (remove '- block_offset' to see why)
+        return pygame.Surface((self.x_canvas_pixels,self.y_canvas_pixels - self.block_offset))
+
     # fills the entire canvas with line_color (squares then get drawn on top)
     def DrawLines(self, window):
         pygame.draw.rect(window, self.line_color, (0, 0, self.x_canvas_pixels, self.y_canvas_pixels))
+
     # draw a single row (used as a helper for DrawRows
     def DrawRow(self, window, gameref, playerref, y_index, current_y):
         j = 0
@@ -59,13 +68,16 @@ class Drawer:
             pygame.draw.circle(window, color, (int(cur_x),int(cur_y)), 3) # draw the dot
             cur_x += (1 - e[0])*self.step_offset
             cur_y += self.step_offset
+
     # draw the player at the current game state
     # 0 <= alpha < 1 is how close to next game state
-    def DrawPlayer(self, window, gameref, playerref, histref, alpha):
+    def DrawPlayer(self, surface, playerref, alpha):
+        gameref = self.gameref
+        histref = playerref.history
         y_lerp_offset = alpha*self.step_offset
-        player_pixel_loc = (self.x_canvas_pixels/2, self.step_offset/2 + playerref.player_y_row_start*self.block_offset)
-        self.DrawLines(window)
-        self.DrawRows(window, gameref, playerref, y_lerp_offset)
-        self.DrawHistoryQueue(window, histref, y_lerp_offset, player_pixel_loc)
-        self.DrawPlayerDot(window, player_pixel_loc)
-
+        player_pixel_loc = (self.x_canvas_pixels/2,
+                            self.step_offset/2 + playerref.player_y_row_start*self.block_offset)
+        self.DrawLines(surface)
+        self.DrawRows(surface, gameref, playerref, y_lerp_offset)
+        self.DrawHistoryQueue(surface, histref, y_lerp_offset, player_pixel_loc)
+        self.DrawPlayerDot(surface, player_pixel_loc)

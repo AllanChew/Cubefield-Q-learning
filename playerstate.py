@@ -32,10 +32,10 @@ class PlayerState:
 
         if moved_left_right or moved_front_block: # will move to new block
             if gameref.block_array[self.player_x_col][self.player_y_row] == 1: # check new block
-                return -1 # new location is a solid block
+                return (moved_front_block,moved_left_right,True) # new location is a solid block
         if ( moved_left_right and moved_front_block and # will move diagonal
              gameref.block_array[self.player_x_col][old_player_y_row] == 1 and # check block immediately left/right
              gameref.block_array[old_player_x_col][self.player_y_row] == 1 ): # check block in front
-            return -1 # hit due to squeezing between two solid block corners
-        return 0
+            return (moved_front_block,moved_left_right,True) # hit due to squeezing between two solid block corners
+        return (moved_front_block,moved_left_right,False)
 

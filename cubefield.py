@@ -10,7 +10,7 @@ import generator
 import playerstrategy
 import sensor
 
-DEFAULT_ITERATIONS = 100000
+DEFAULT_ITERATIONS = 5000
 DEFAULT_STATE_DELAY = 50
 DEFAULT_COLS = 7
 DEFAULT_ROWS = 12
@@ -76,7 +76,7 @@ game = Cubefield()
 sensor = sensor.TripleSensor()
 sensor.gameref = game # bad - just lazy :)
 # first player
-strategy = playerstrategy.PlayerStrategy()
+strategy = playerstrategy.PlayerStrategy(DEFAULT_ITERATIONS)
 game.AddPlayer(player.Player(DEFAULT_PLAYER_START_CORD,
                        DEFAULT_LEARNING_RATE,
                        DEFAULT_DISCOUNT_FACTOR,

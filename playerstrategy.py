@@ -4,6 +4,9 @@ import math
 
 class Strategy:
 
+    def __init__(self, iterations):
+        self.iterations = iterations
+
     def getStrategyAction(self, action_q_values):
         raise NotImplementedError("implemented in sub class")
 
@@ -26,6 +29,7 @@ class EpsilonGreedyStrategy(GreedyStrategy):
     epsilon = 1
 
     def __init__(self, iterations):
+        super().__init__(iterations)  # super init sets self.iterations
         self.epsilon_offset = self.epsilon/iterations
 
     def getStrategyAction(self, action_q_values):
@@ -41,6 +45,7 @@ class SoftMaxStrategy(GreedyStrategy):
     temperature = 15
 
     def __init__(self, iterations):
+        super().__init__(iterations)  # super init sets self.iterations
         self.anneal_mult = (self.min_temperature/self.temperature)**(1/iterations)
 
     def getStrategyAction(self, action_q_values):

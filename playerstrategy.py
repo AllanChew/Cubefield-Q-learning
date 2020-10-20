@@ -9,12 +9,11 @@ class Strategy:
 
 
 class PlayerStrategy(Strategy):
-    key = 1
+    left_down = 0
+    right_down = 0
 
     def getStrategyAction(self, action_q_values):
-        ret = self.key
-        self.key = 1
-        return ret
+        return self.right_down - self.left_down + 1
 
 
 class GreedyStrategy(Strategy):

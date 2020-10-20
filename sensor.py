@@ -18,9 +18,8 @@ class TripleSensor:
     def getStates(self):
         return 64
 
-    def getState(self):
+    def getState(self,playerref):
         gameref = self.gameref
-        playerref = gameref.player
         x_middle = playerref.player_x_col
         x_left = (x_middle + gameref.x_col_blocks - 1) % gameref.x_col_blocks
         x_right = (x_middle + 1) % gameref.x_col_blocks

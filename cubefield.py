@@ -32,10 +32,7 @@ class Cubefield(object):
     game_y_step =  0 # step from 0 to steps_per_block-1
     generation_y_index = 0 # TODO: Rename maybe - not very descriptive
 
-    # Set after main() is called to assign the pygame window to this
-    window = None
-
-    def __init__(self, player,
+    def __init__(self,
                  num_cols=DEFAULT_COLS,
                  num_rows=DEFAULT_ROWS,
                  num_steps=DEFAULT_STEPS):
@@ -44,15 +41,14 @@ class Cubefield(object):
         self.steps_per_block = num_steps
         self.block_array = [[0 for j in range(self.y_row_blocks)] for i in range(self.x_col_blocks)]
 
-        # Player - currently only support a single player as drawing is centered on a player
-        # and does not extend well.
-        self.player = player
-
-        # create drawer
-        self.drawer = drawer.Drawer(self)
+        self.players = []
 
         # Row Generator
         self.generator = generator.FloodFillGenerator(self)
+
+    def AddPlayer(self, player):
+        player.gameref = self
+        self.players.append(player)
 
     def _advance_y_step(self):
         self.game_y_step = (self.game_y_step - 1) % (self.steps_per_block)
@@ -61,7 +57,8 @@ class Cubefield(object):
         self.generation_y_index = (self.generation_y_index -1) % self.y_row_blocks
 
     def advanceStep(self):
-        player.performStepDecision()
+        for player in self.players:
+            player.performStepDecision()
         # if y step is 0, we generate
         if self.game_y_step == 0:
             self._advance_y_index()
@@ -75,26 +72,46 @@ class Cubefield(object):
 # strategy = playerstrategy.PlayerStrategy()
 # strategy = playerstrategy.GreedyStrategy()
 # strategy = playerstrategy.EpsilonGreedyStrategy(DEFAULT_ITERATIONS)
+game = Cubefield()
 sensor = sensor.TripleSensor()
-strategy = playerstrategy.SoftMaxStrategy(DEFAULT_ITERATIONS)
-player = player.Player(DEFAULT_PLAYER_START_CORD,
+sensor.gameref = game # bad - just lazy :)
+# first player
+strategy = playerstrategy.PlayerStrategy()
+game.AddPlayer(player.Player(DEFAULT_PLAYER_START_CORD,
                        DEFAULT_LEARNING_RATE,
                        DEFAULT_DISCOUNT_FACTOR,
                        strategy,
                        sensor)
-game = Cubefield(player)
-# bad - just lazy :)
-player.gameref = game
-sensor.gameref = game
+               )
+# second player
+strategy2 = playerstrategy.SoftMaxStrategy(DEFAULT_ITERATIONS)
+game.AddPlayer(player.Player(DEFAULT_PLAYER_START_CORD,
+                       DEFAULT_LEARNING_RATE,
+                       DEFAULT_DISCOUNT_FACTOR,
+                       strategy2,
+                       sensor)
+               )
+
+# move this into UI in the future
+# should draw UI elements before/after this (game info, graphs, etc.)
+gamedrawer = drawer.Drawer(game)
+temp_surface = gamedrawer.CreateSurface() # gets blitted onto mainwindow
+mainwindow = pygame.display.set_mode((800,600)) # this gets UI drawn on top
+def DrawGameSurfaces(game,lerp_alpha):
+    x_offset = 10
+    y_offset = 10
+    # draw all the players
+    for player in game.players:
+        # draw the player onto temp_surface
+        gamedrawer.DrawPlayer(temp_surface,player,lerp_alpha)
+        # then blit the surface to the mainsurface
+        mainwindow.blit(temp_surface,(x_offset,y_offset))
+        x_offset += 400
+
 def main():
     # initialize pygame
     pygame.init()
-    # last row is out of view due to generation (remove '- block_offset' to see why)
-    maindrawer = game.drawer
-    mainwindow = pygame.display.set_mode(
-        (maindrawer.x_canvas_pixels,maindrawer.y_canvas_pixels - maindrawer.block_offset)
-    )
-    game.window = mainwindow
+
     clock = pygame.time.Clock()
     clock.tick()
 
@@ -106,8 +123,8 @@ def main():
             game.advanceStep()
             time_bank -= game.state_delay
 
-        # re-draw, then update the display
-        maindrawer.update(time_bank/game.state_delay)
+        # draw all the game surfaces then update display
+        DrawGameSurfaces(game, time_bank/game.state_delay) # in the future replace with a UI function
         pygame.display.update()
 
         for event in GAME_EVENTS.get():
@@ -117,16 +134,19 @@ def main():
                 if event.key == pygame.K_ESCAPE:
                     running = False
                 elif event.key == pygame.K_UP:
-                    if game.state_delay >= 20:
-                        game.state_delay -= 10
+                    if game.state_delay >= 6:
+                        game.state_delay -= 5
                 elif event.key == pygame.K_DOWN:
-                    game.state_delay += 10
-            # TODO; WHY DOES THIS WORK WHEN KEYDOWN DOESNT EXIST FOR ALL STRATEGIES
+                    game.state_delay += 5
+                elif event.key == pygame.K_PRINT:
+                    pygame.image.save(mainwindow,"screenshot.png")
+                elif event.key == pygame.K_LEFT:
+                    strategy.left_down = 1
+                elif event.key == pygame.K_RIGHT:
+                    strategy.right_down = 1
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_LEFT:
-                    strategy.key = 0
+                    strategy.left_down = 0
                 elif event.key == pygame.K_RIGHT:
-                    strategy.key = 2
+                    strategy.right_down = 0
     pygame.quit()
-
-main()

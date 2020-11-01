@@ -34,7 +34,7 @@ class Player:
     # set gameref once its made
     gameref = None
 
-    def __init__(self, start_coords, learning_rate, discount_factor, strategy, sensor):
+    def __init__(self, start_coords, learning_rate, discount_factor, strategy, sensor, name):
         self.player_x_col = start_coords[0]
         self.player_y_row = start_coords[1]
         self.player_y_row_start = self.player_y_row
@@ -55,6 +55,8 @@ class Player:
         self.training_collisions_over_iterations = []
         self.playing_collisions_over_iterations = []
         self.loop_iterations = self.strategy.iterations
+
+        self.name = name
 
     def _advance_iteration(self):
         self.iteration += 1

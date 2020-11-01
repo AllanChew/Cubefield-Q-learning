@@ -4,7 +4,7 @@ import pygame.locals as GAME_GLOBALS
 import pygame.event as GAME_EVENTS
 
 # 'Local' imports
-import drawer
+import ui
 import player
 import generator
 import playerstrategy
@@ -13,9 +13,9 @@ import sensor
 DEFAULT_ITERATIONS = 5000
 DEFAULT_STATE_DELAY = 50
 DEFAULT_COLS = 7
-DEFAULT_ROWS = 12
+DEFAULT_ROWS = 9
 DEFAULT_STEPS = 8
-DEFAULT_PLAYER_START_CORD = (3, 8)  # screen moves around player
+DEFAULT_PLAYER_START_CORD = (3, 5)  # screen moves around player
 DEFAULT_LEARNING_RATE = 0.2 # parameter that can be tweaked
 DEFAULT_DISCOUNT_FACTOR = 0.8 # parameter that can be tweaked
 
@@ -75,57 +75,68 @@ class Cubefield(object):
 game = Cubefield()
 sensor = sensor.TripleSensor()
 sensor.gameref = game # bad - just lazy :)
-# first player
-strategy = playerstrategy.PlayerStrategy(DEFAULT_ITERATIONS)
-game.AddPlayer(player.Player(DEFAULT_PLAYER_START_CORD,
-                       DEFAULT_LEARNING_RATE,
-                       DEFAULT_DISCOUNT_FACTOR,
-                       strategy,
-                       sensor)
-               )
-# second player
-strategy2 = playerstrategy.SoftMaxStrategy(DEFAULT_ITERATIONS)
-game.AddPlayer(player.Player(DEFAULT_PLAYER_START_CORD,
-                       DEFAULT_LEARNING_RATE,
-                       DEFAULT_DISCOUNT_FACTOR,
-                       strategy2,
-                       sensor)
-               )
+strategy = playerstrategy.PlayerStrategy(DEFAULT_ITERATIONS) # for human to test game
+# first player (greedy)
+strategy1 = playerstrategy.GreedyStrategy(DEFAULT_ITERATIONS)
+# second player (fixed epsilon = 0.25)
+strategy2 = playerstrategy.EpsilonGreedyStrategy(DEFAULT_ITERATIONS)
+strategy2.epsilon_offset = 0 # epsilon doesn't change
+strategy2.epsilon = 0.25
+# third player (fixed epsilon = 0.5)
+strategy3 = playerstrategy.EpsilonGreedyStrategy(DEFAULT_ITERATIONS)
+strategy3.epsilon_offset = 0 # epsilon doesn't change
+strategy3.epsilon = 0.5
+# fourth player (fixed epsilon = 0.75)
+strategy4 = playerstrategy.EpsilonGreedyStrategy(DEFAULT_ITERATIONS)
+strategy4.epsilon_offset = 0 # epsilon doesn't change
+strategy4.epsilon = 0.75
+# fifth player (random)
+strategy5 = playerstrategy.EpsilonGreedyStrategy(DEFAULT_ITERATIONS)
+strategy5.epsilon_offset = 0 # epsilon stays at 1 so always random
+# sixth player (epsilon greedy)
+strategy6 = playerstrategy.EpsilonGreedyStrategy(DEFAULT_ITERATIONS)
+# seventh player (softmax)
+strategy7 = playerstrategy.SoftMaxStrategy(DEFAULT_ITERATIONS)
+strategies = ((strategy1,"Fixed Epsilon = 0 (greedy)"),
+              (strategy2,"Fixed Epsilon = 0.25"),
+              (strategy3,"Fixed Epsilon = 0.5"),
+              (strategy4,"Fixed Epsilon = 0.75"),
+              (strategy5,"Fixed Epsilon = 1 (random)"),
+              (strategy6,"Epsilon Greedy"),
+              (strategy7,"Softmax"))
+for strat_tuple in strategies:
+    game.AddPlayer(player.Player(DEFAULT_PLAYER_START_CORD,
+                                 DEFAULT_LEARNING_RATE,
+                                 DEFAULT_DISCOUNT_FACTOR,
+                                 strat_tuple[0],
+                                 sensor,
+                                 strat_tuple[1])
+                   )
 
-# move this into UI in the future
-# should draw UI elements before/after this (game info, graphs, etc.)
-gamedrawer = drawer.Drawer(game)
-temp_surface = gamedrawer.CreateSurface() # gets blitted onto mainwindow
-mainwindow = pygame.display.set_mode((800,600)) # this gets UI drawn on top
-def DrawGameSurfaces(game,lerp_alpha):
-    x_offset = 10
-    y_offset = 10
-    # draw all the players
-    for player in game.players:
-        # draw the player onto temp_surface
-        gamedrawer.DrawPlayer(temp_surface,player,lerp_alpha)
-        # then blit the surface to the mainsurface
-        mainwindow.blit(temp_surface,(x_offset,y_offset))
-        x_offset += 400
+mainui = ui.UI(game)
 
 def main():
     # initialize pygame
     pygame.init()
 
+    mainwindow = pygame.display.set_mode((1280,720)) # this gets UI drawn on top
     clock = pygame.time.Clock()
     clock.tick()
 
+    paused = False
     running = True
     time_bank = 0 # keep initialized to 0
     while running:
         time_bank += clock.tick()
         while time_bank >= game.state_delay:
-            game.advanceStep()
+            if not paused:
+                game.advanceStep()
             time_bank -= game.state_delay
 
         # draw all the game surfaces then update display
-        DrawGameSurfaces(game, time_bank/game.state_delay) # in the future replace with a UI function
-        pygame.display.update()
+        if not paused:
+            mainui.DrawGame(mainwindow, game, time_bank/game.state_delay)
+            pygame.display.update()
 
         for event in GAME_EVENTS.get():
             if event.type == GAME_GLOBALS.QUIT:
@@ -133,6 +144,8 @@ def main():
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     running = False
+                elif event.key == pygame.K_p:
+                    paused = not paused
                 elif event.key == pygame.K_UP:
                     if game.state_delay >= 6:
                         game.state_delay -= 5

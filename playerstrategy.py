@@ -41,7 +41,7 @@ class EpsilonGreedyStrategy(GreedyStrategy):
 
 
 class SoftMaxStrategy(GreedyStrategy):
-    min_temperature = 0.001
+    min_temperature = 0.01
     temperature = 15
 
     def __init__(self, iterations):

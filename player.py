@@ -18,17 +18,9 @@ def RewardFunc2(action_result):
 class Player:
     player_x_step = 0
 
-    # for plotting
-    iteration = 0
-    training_collisions = 0
-    playing_collisions = 0
-    training_collisions_over_iterations = None
-    playing_collisions_over_iterations = None
-
-    training = True
-    playing = False
-    report_training = True
-    report_playing = True
+    # for plotting and UI
+    total_collisions = 0
+    total_collisions_over_iterations = None
 
 
     # set gameref once its made
@@ -52,21 +44,9 @@ class Player:
         self.QTable = [[0 for j in range(3)] for i in range(self.sensor.getStates())]
 
         # If we make lists above, they are shared between instances => very bad
-        self.training_collisions_over_iterations = []
-        self.playing_collisions_over_iterations = []
-        self.loop_iterations = self.strategy.iterations
+        self.total_collisions_over_iterations = []
 
-        self.name = name
-
-    def _advance_iteration(self):
-        self.iteration += 1
-        if self.iteration > self.loop_iterations:
-            if self.training:
-                self.playing = True
-                self.training = False
-                self.iteration = 0
-            elif self.playing:
-                self.playing = False
+        self.name = name # for UI
 
 
     def performStepDecision(self):
@@ -74,27 +54,14 @@ class Player:
         state_copy = self.sensor.getState(self)
         action = self.strategy.getStrategyAction(self.QTable[state_copy])
         action_result = self.ApplyAction(self.gameref, action)
-        # if collided - track for plotting
-        self._advance_iteration()        
-        if action_result[2]:
-            if self.training:
-                self.training_collisions += 1
-            elif self.playing:
-                self.playing_collisions += 1
-        if self.training:
-            self.training_collisions_over_iterations.append(self.training_collisions)
-        elif self.playing:
-            if self.report_training:
-                print("Strategy: %s Training %d." % (self.strategy, len(self.training_collisions_over_iterations)))
-                print(self.training_collisions_over_iterations)
-                self.report_training = False
-            self.playing_collisions_over_iterations.append(self.playing_collisions)
-        else:
-            if self.report_playing:
-                print("Strategy: %s Playing %d." % (self.strategy, len(self.playing_collisions_over_iterations)))
-                print(self.playing_collisions_over_iterations)
-                self.report_playing = False
-
+        # for plotting and UI
+        if action_result[2]: # if collided
+            self.total_collisions += 1
+        self.total_collisions_over_iterations.append(self.total_collisions)
+        # for debugging:
+        # if len(self.total_collisions_over_iterations) == 10000:
+        #   print("Strategy: %s Playing %d." % (self.strategy, len(self.total_collisions_over_iterations)))
+        #   print(self.total_collisions_over_iterations)
 
         reward = RewardFunc1(action_result)
         self.history.UpdateHistoryQueue(action, reward)

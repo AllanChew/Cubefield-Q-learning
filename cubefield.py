@@ -115,7 +115,7 @@ for strat_tuple in strategies:
 
 mainui = ui.UI(game)
 
-def main():
+def main(iterations = 2*DEFAULT_ITERATIONS):
     # initialize pygame
     pygame.init()
 
@@ -123,13 +123,17 @@ def main():
     clock = pygame.time.Clock()
     clock.tick()
 
+    iteration_val = 0
     paused = False
     running = True
     time_bank = 0 # keep initialized to 0
     while running:
         time_bank += clock.tick()
         while time_bank >= game.state_delay:
+            if iteration_val >= iterations:
+                paused = True
             if not paused:
+                iteration_val += 1
                 game.advanceStep()
             time_bank -= game.state_delay
 

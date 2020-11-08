@@ -1,23 +1,32 @@
 import playerhistory
 
+
 # action_result is a tuple of bools:
 #  (moved_front_block,moved_left_right,collided)
 def RewardFunc1(action_result):
     if action_result[2]: # collided
         return -1
     return 0
+
+
 def RewardFunc2(action_result):
     if action_result[2]: # collided
         return -8
     return 1
 
+
 class Player:
     player_x_step = 0
+
+    # for plotting and UI
+    total_collisions = 0
+    total_collisions_over_iterations = None
+
 
     # set gameref once its made
     gameref = None
 
-    def __init__(self, start_coords, learning_rate, discount_factor, strategy, sensor):
+    def __init__(self, start_coords, learning_rate, discount_factor, strategy, sensor, name):
         self.player_x_col = start_coords[0]
         self.player_y_row = start_coords[1]
         self.player_y_row_start = self.player_y_row
@@ -34,11 +43,26 @@ class Player:
         # QTable[state][action]
         self.QTable = [[0 for j in range(3)] for i in range(self.sensor.getStates())]
 
+        # If we make lists above, they are shared between instances => very bad
+        self.total_collisions_over_iterations = []
+
+        self.name = name # for UI
+
+
     def performStepDecision(self):
         # non optimized - each call results in 2 calls to getState() -> 1 will be duplicated next call
         state_copy = self.sensor.getState(self)
         action = self.strategy.getStrategyAction(self.QTable[state_copy])
         action_result = self.ApplyAction(self.gameref, action)
+        # for plotting and UI
+        if action_result[2]: # if collided
+            self.total_collisions += 1
+        self.total_collisions_over_iterations.append(self.total_collisions)
+        # for debugging:
+        # if len(self.total_collisions_over_iterations) == 10000:
+        #   print("Strategy: %s Playing %d." % (self.strategy, len(self.total_collisions_over_iterations)))
+        #   print(self.total_collisions_over_iterations)
+
         reward = RewardFunc1(action_result)
         self.history.UpdateHistoryQueue(action, reward)
         new_state = self.sensor.getState(self)
@@ -78,3 +102,18 @@ class Player:
              gameref.block_array[old_player_x_col][self.player_y_row] == 1 ) ): # check block in front
             return (moved_front_block,moved_left_right,True) # hit due to squeezing between two solid block corners
         return (moved_front_block,moved_left_right,False)
+
+
+# def main():
+
+#     size = 100000
+#     x_vec = np.linspace(0, size, size+1)[0:-1]
+#     y_vec = np.zeros(size)
+#     line1 = []
+#     while True:
+#         rand_val = np.random.randn(1)
+#         y_vec[-1] = rand_val
+#         line1 = live_plotter(x_vec,y_vec,line1)
+#         y_vec = np.append(y_vec[1:],0.0)
+
+# main()

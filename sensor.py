@@ -16,7 +16,7 @@ class TripleSensor:
     gameref = None
 
     def getStates(self):
-        return 64
+        return 128
 
     def getState(self,playerref):
         gameref = self.gameref
@@ -28,5 +28,6 @@ class TripleSensor:
         left_sensor_val = GetSingleSensor(gameref, x_left, y_sides)[0]
         middle_sensor_val = GetSingleSensor(gameref, x_middle, y_middle)[0]
         right_sensor_val = GetSingleSensor(gameref, x_right, y_sides)[0]
+        half_sensor_val = 0 if playerref.player_x_step < gameref.steps_per_block/2 else 1
         # print(left_sensor_val,middle_sensor_val,right_sensor_val) # debug
-        return left_sensor_val*4*4 + middle_sensor_val*4 + right_sensor_val
+        return half_sensor_val*4*4*4 + left_sensor_val*4*4 + middle_sensor_val*4 + right_sensor_val

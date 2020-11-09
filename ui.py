@@ -12,6 +12,7 @@ class UI:
         for player in game.players:
             # draw the player onto temp_surface
             self.gamedrawer.DrawPlayer(self.temp_surface,player,lerp_alpha)
+            self.gamedrawer.DrawTotalCollisions(self.temp_surface, player.total_collisions)
             # TODO: text for total collisions for the player
             #         consider using alpha transparency
             #       text for player.name

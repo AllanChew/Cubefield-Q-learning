@@ -1,5 +1,7 @@
 import pygame
+import sys
 
+pygame.font.init() # initialize the font module
 
 class Drawer:
     block_size = 38 # how many pixels wide for the square blocks
@@ -7,6 +9,7 @@ class Drawer:
     free_block_color = (255,255,255) # white
     solid_block_color = (125,125,125) # grey
     line_color = (0,0,0) # black
+    font = pygame.font.SysFont("Comic Sans MS", 16) # text font for our labels
 
     def __init__(self, gameref):
         self.block_offset = self.line_thickness + self.block_size
@@ -32,14 +35,14 @@ class Drawer:
             square_color = self.free_block_color
             if cur_block == 1:
                 square_color = self.solid_block_color
-            
+
             # draw square
             pygame.draw.rect(surface, square_color, (int(current_x), int(current_y), self.block_size, self.block_size))
-            
+
             if (current_x + self.block_size) > self.x_canvas_pixels: # wrap around to left
                 current_x -= self.x_canvas_pixels
                 continue
-            
+
             current_x += self.block_offset
             j += 1
     # draw all rows
@@ -48,10 +51,10 @@ class Drawer:
         current_y = self.line_thickness/2 - self.step_offset*gameref.game_y_step + y_lerp_offset
         while (i < gameref.y_row_blocks):
             y_index = (gameref.generation_y_index + i) % gameref.y_row_blocks
-            
+
             # draw row
             self.DrawRow(surface, gameref, playerref, y_index, current_y)
-            
+
             current_y += self.block_offset
             i += 1
     # draw blue circle w/ radius 3 pixels at where player is
@@ -81,3 +84,14 @@ class Drawer:
         self.DrawRows(surface, gameref, playerref, y_lerp_offset)
         self.DrawHistoryQueue(surface, histref, y_lerp_offset, player_pixel_loc)
         self.DrawPlayerDot(surface, player_pixel_loc)
+
+    # draw text onto input surface
+    def DrawText(self, surface, text):
+        textSurface = self.font.render(text, 1, (200, 0, 0), (255,255,255)) # red text color, white background
+        surface.blit(textSurface, (0, 0))
+
+    # draw total number of collisions onto the surface
+    def DrawTotalCollisions(self, surface, total_collisions):
+        collisionStatement = "  Total Collisions: " + str(total_collisions) + "  "
+        self.DrawText(surface, collisionStatement)
+

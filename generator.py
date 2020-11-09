@@ -2,7 +2,7 @@ import random
 
 
 class Generator:
-    
+
     def __init__(self, game):
         self.game = game
 
@@ -14,7 +14,7 @@ class Generator:
     @property
     def generation_y_index(self):
         return self.game.generation_y_index
-    
+
     @property
     def x_col_blocks(self):
         return self.game.x_col_blocks
@@ -60,7 +60,7 @@ class FloodFillGenerator(Generator):
                     max_y = new_offset_y
                 frontier.append((new_offset_x, new_offset_y))
         return len(seen_list) <= max_island_size, max_x - min_x + 1, max_y - min_y + 1
-    
+
     def generateNewRow(self):
         # first clear the row
         for i in range(self.x_col_blocks):

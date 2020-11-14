@@ -75,7 +75,7 @@ class Cubefield(object):
 game = Cubefield()
 sensor = sensor.TripleSensor()
 sensor.gameref = game # bad - just lazy :)
-strategy = playerstrategy.PlayerStrategy(DEFAULT_ITERATIONS) # for human to test game
+# strategy = playerstrategy.PlayerStrategy(DEFAULT_ITERATIONS) # for human to test game
 # first player (greedy)
 strategy1 = playerstrategy.GreedyStrategy(DEFAULT_ITERATIONS)
 # second player (fixed epsilon = 0.25)
@@ -166,4 +166,12 @@ def main(iterations = 2*DEFAULT_ITERATIONS):
                     strategy.left_down = 0
                 elif event.key == pygame.K_RIGHT:
                     strategy.right_down = 0
+
+    # TODO: Should probably make sure we have iteration*2 entries?
+    # For now - just print what we have, dont care if we stop early and dont have full data
+    # TODO: Format of file - currently just a line for each strategy
+    # name: list
+    with open("unformatted.txt", "w") as output_file:
+        for player in game.players:
+            output_file.write("%s: %s\n" % (player.name, player.total_collisions_over_iterations))
     pygame.quit()

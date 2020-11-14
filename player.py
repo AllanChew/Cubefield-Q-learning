@@ -11,8 +11,10 @@ def RewardFunc1(action_result):
 
 def RewardFunc2(action_result):
     if action_result[2]: # collided
-        return -8
-    return 1
+        return -1
+    if action_result[0]: # moved to forward block
+        return 1
+    return 0 # otherwise return 0
 
 
 class Player:

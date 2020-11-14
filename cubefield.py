@@ -115,6 +115,41 @@ for strat_tuple in strategies:
 
 mainui = ui.UI(game)
 
+def save_separate_files():
+    strat_id = 1
+    for player in game.players:
+        output_file = open("strategy{0}.txt".format(strat_id),"w")
+        output_file.write("Strategy: %s\n" % (player.name)) # print header
+        for val in player.total_collisions_over_iterations: # print all values on newline (makes easier to copy into spreadsheet)
+            output_file.write("{0}\n".format(val))
+        output_file.close()
+        strat_id += 1 # increment id for file name
+
+def save_csv():
+    cols = len(game.players)
+    if cols == 0:
+        return
+    rows = len(game.players[0].total_collisions_over_iterations)
+    if rows == 0:
+        return
+    output_file = open("trial_results.csv","w")
+    # header
+    output_file.write(game.players[0].name)
+    for player in game.players[1:]:
+        output_file.write(",")
+        output_file.write(player.name)
+    output_file.write("\n")
+    row = 0
+    while row != rows:
+        output_file.write("{0}".format(game.players[0].total_collisions_over_iterations[row]))
+        col = 1
+        while col != cols:
+            output_file.write(",{0}".format(game.players[col].total_collisions_over_iterations[row]))
+            col += 1
+        output_file.write("\n")
+        row += 1
+    output_file.close()
+
 def main(iterations = 2*DEFAULT_ITERATIONS):
     # initialize pygame
     pygame.init()
@@ -166,12 +201,13 @@ def main(iterations = 2*DEFAULT_ITERATIONS):
                     strategy.left_down = 0
                 elif event.key == pygame.K_RIGHT:
                     strategy.right_down = 0
-
+    pygame.quit()
     # TODO: Should probably make sure we have iteration*2 entries?
     # For now - just print what we have, dont care if we stop early and dont have full data
     # TODO: Format of file - currently just a line for each strategy
     # name: list
-    with open("unformatted.txt", "w") as output_file:
-        for player in game.players:
-            output_file.write("%s: %s\n" % (player.name, player.total_collisions_over_iterations))
-    pygame.quit()
+    # with open("unformatted.txt", "w") as output_file:
+        # for player in game.players:
+            # output_file.write("%s: %s\n" % (player.name, player.total_collisions_over_iterations))
+    # save_separate_files()
+    save_csv()

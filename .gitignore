@@ -130,3 +130,6 @@ dmypy.json
 
 # test screenshots
 screenshot.png
+
+# trial results
+trial_results.csv

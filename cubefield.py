@@ -134,15 +134,15 @@ def save_csv():
         return
     output_file = open("trial_results.csv","w")
     # header
-    output_file.write(game.players[0].name)
-    for player in game.players[1:]:
+    output_file.write("Frame Number")
+    for player in game.players:
         output_file.write(",")
         output_file.write(player.name)
     output_file.write("\n")
     row = 0
     while row != rows:
-        output_file.write("{0}".format(game.players[0].total_collisions_over_iterations[row]))
-        col = 1
+        output_file.write("{0}".format(row))
+        col = 0
         while col != cols:
             output_file.write(",{0}".format(game.players[col].total_collisions_over_iterations[row]))
             col += 1

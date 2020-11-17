@@ -6,7 +6,7 @@ Welcome to our CS486 final project. In this project, we implemented an AI to pla
 
 The following is a screenshot of our game. As you can see, each square is either grey (representing an obstacle), or white (representing empty space). As the squares scroll downwards, the player has the option of moving left, right, or staying in the same column in order to avoid colliding with incoming obstacles. To aid visual feedback and help us better trace the agent's travelled path, we added room below the player where green and red dots show the last 20 moves of the player. A red dot is used to represent a collision with a block, otherwise a green dot is used. These red and green dots are purely graphical and have no impact on the game's mechanics. 
 
-<img src="/cubefield-screenshot.png" width = "500">
+<img src="/cubefield-screenshot.png" width = "400">
 
 In addition to the option of playing the game, our team has implemented the different behaviour policies and presented the AI's gameplay simultaneously on 7 screens, as shown below:
 

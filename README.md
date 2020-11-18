@@ -22,10 +22,10 @@ python3 main.py
 
 ### Controls
 
-Esc - Quit
-P - Pause
-Up Arrow - Speed up game
-Down Arrow - Slow down game
+Esc - Quit\
+P - Pause\
+Up Arrow - Speed up game\
+Down Arrow - Slow down game\
 
 You should see Pygame start up and showcase the screenshots as shown above.
 

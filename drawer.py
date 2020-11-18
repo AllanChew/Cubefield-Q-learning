@@ -91,7 +91,7 @@ class Drawer:
         surface.blit(textSurface, (0, 0))
 
     # draw total number of collisions onto the surface
-    def DrawTotalCollisions(self, surface, total_collisions):
-        collisionStatement = "  Total Collisions: " + str(total_collisions) + "  "
+    def DrawTotalCollisions(self, name, surface, total_collisions):
+        collisionStatement = "  " + name + " - Total Collisions: " + str(total_collisions) + "  "
         self.DrawText(surface, collisionStatement)
 

@@ -85,13 +85,15 @@ class Drawer:
         self.DrawHistoryQueue(surface, histref, y_lerp_offset, player_pixel_loc)
         self.DrawPlayerDot(surface, player_pixel_loc)
 
-    # draw text onto input surface
-    def DrawText(self, surface, text):
-        textSurface = self.font.render(text, 1, (200, 0, 0), (255,255,255)) # red text color, white background
-        surface.blit(textSurface, (0, 0))
+    # draw policy name onto the surface
+    def DrawPolicyName(self, surface, name):
+        policyName = " " + name + " "
+        textSurface = self.font.render(policyName, 1, (200, 0, 0), (255,255,255)) # red text color, white background
+        surface.blit(textSurface, (0, 297)) # place the total number of collisions on the top left
 
     # draw total number of collisions onto the surface
-    def DrawTotalCollisions(self, name, surface, total_collisions):
-        collisionStatement = "  " + name + " - Total Collisions: " + str(total_collisions) + "  "
-        self.DrawText(surface, collisionStatement)
+    def DrawTotalCollisions(self, surface, total_collisions):
+        collisionStatement = " Total Collisions: " + str(total_collisions) + "  "
+        textSurface = self.font.render(collisionStatement, 1, (200, 0, 0), (255,255,255)) # red text color, white background
+        surface.blit(textSurface, (0, 0)) # place the total number of collisions on the top left
 

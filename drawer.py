@@ -85,15 +85,25 @@ class Drawer:
         self.DrawHistoryQueue(surface, histref, y_lerp_offset, player_pixel_loc)
         self.DrawPlayerDot(surface, player_pixel_loc)
 
+    # default text_color of red and default bg_color of white
+    def DrawText(self, surface, text, posn = (0,0), text_color = (200, 0, 0), bg_color = (255,255,255)):
+        textSurface = self.font.render(text, 1, text_color, bg_color)
+        textSurface.set_alpha(191) # 75% opaque
+        surface.blit(textSurface, posn)
+        textSurface = self.font.render(text, 1, text_color) # text gets redrawn with 100% opaque
+        surface.blit(textSurface, posn)
+
     # draw policy name onto the surface
     def DrawPolicyName(self, surface, name):
         policyName = " " + name + " "
-        textSurface = self.font.render(policyName, 1, (200, 0, 0), (255,255,255)) # red text color, white background
-        surface.blit(textSurface, (0, 297)) # place the total number of collisions on the top left
+        self.DrawText(surface, policyName, (0, 0)) # top left
 
     # draw total number of collisions onto the surface
     def DrawTotalCollisions(self, surface, total_collisions):
         collisionStatement = " Total Collisions: " + str(total_collisions) + "  "
-        textSurface = self.font.render(collisionStatement, 1, (200, 0, 0), (255,255,255)) # red text color, white background
-        surface.blit(textSurface, (0, 0)) # place the total number of collisions on the top left
+        self.DrawText(surface, collisionStatement, (0, 297)) # bottom left
+
+    def DrawStrategyText(self, surface, strategyText):
+        if strategyText:
+            self.DrawText(surface, strategyText, (0, 24)) # top left
 

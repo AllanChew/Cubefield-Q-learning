@@ -75,7 +75,7 @@ class Cubefield(object):
 game = Cubefield()
 sensor = sensor.TripleSensor()
 sensor.gameref = game # bad - just lazy :)
-# strategy = playerstrategy.PlayerStrategy(DEFAULT_ITERATIONS) # for human to test game
+strategy = playerstrategy.PlayerStrategy(DEFAULT_ITERATIONS) # for human to test game
 # first player (greedy)
 strategy1 = playerstrategy.GreedyStrategy(DEFAULT_ITERATIONS)
 # second player (fixed epsilon = 0.25)
@@ -103,7 +103,8 @@ strategies = ((strategy1,"Fixed Epsilon = 0 (greedy)"),
               (strategy4,"Fixed Epsilon = 0.75"),
               (strategy5,"Fixed Epsilon = 1 (random)"),
               (strategy6,"Epsilon Greedy"),
-              (strategy7,"Softmax"))
+              (strategy7,"Softmax"),
+              (strategy,"Player"))
 for strat_tuple in strategies:
     game.AddPlayer(player.Player(DEFAULT_PLAYER_START_CORD,
                                  DEFAULT_LEARNING_RATE,
@@ -113,7 +114,6 @@ for strat_tuple in strategies:
                                  strat_tuple[1])
                    )
 
-mainui = ui.UI(game)
 
 def save_separate_files():
     strat_id = 1
@@ -150,11 +150,22 @@ def save_csv():
         row += 1
     output_file.close()
 
+# no rendering (should finish in seconds)
+def main2(iterations = 2*DEFAULT_ITERATIONS):
+    iteration_val = 0
+    while iteration_val < iterations:
+        game.advanceStep()
+        iteration_val += 1
+    save_csv()
+
 def main(iterations = 2*DEFAULT_ITERATIONS):
     # initialize pygame
     pygame.init()
 
-    mainwindow = pygame.display.set_mode((1280,720)) # this gets UI drawn on top
+    WINDOW_X_LEN = 1280
+    WINDOW_Y_LEN = 720
+    mainwindow = pygame.display.set_mode((WINDOW_X_LEN,WINDOW_Y_LEN)) # this gets UI drawn on top
+    mainui = ui.UI(game, DEFAULT_ITERATIONS, iterations, WINDOW_X_LEN, WINDOW_Y_LEN)
     clock = pygame.time.Clock()
     clock.tick()
 
@@ -174,7 +185,7 @@ def main(iterations = 2*DEFAULT_ITERATIONS):
 
         # draw all the game surfaces then update display
         if not paused:
-            mainui.DrawGame(mainwindow, game, time_bank/game.state_delay)
+            mainui.DrawGame(mainwindow, game, time_bank/game.state_delay, iteration_val)
             pygame.display.update()
 
         for event in GAME_EVENTS.get():

@@ -10,6 +10,9 @@ class Strategy:
     def getStrategyAction(self, action_q_values):
         raise NotImplementedError("implemented in sub class")
 
+    def getStrategyText(self):
+        return "" # player and greedy don't print anything
+
 
 class PlayerStrategy(Strategy):
     left_down = 0
@@ -33,13 +36,21 @@ class EpsilonGreedyStrategy(GreedyStrategy):
         super().__init__(iterations)  # super init sets self.iterations
         self.epsilon_offset = self.epsilon/iterations
 
+    def getDoneTraining(self):
+        return self.epsilon < 0 or self.iteration_val >= self.iterations
+
     def getStrategyAction(self, action_q_values):
-        if self.epsilon < 0 or self.iteration_val >= self.iterations:
+        if self.getDoneTraining():
             return super().getStrategyAction(action_q_values)
         ret_val = random.randint(0,2) if random.random() < self.epsilon else super().getStrategyAction(action_q_values)
         self.epsilon -= self.epsilon_offset
         self.iteration_val += 1
         return ret_val
+
+    def getStrategyText(self):
+        if self.getDoneTraining():
+            return "Using greedy"
+        return " epsilon = {} ".format(round(self.epsilon,4))
 
 
 class SoftMaxStrategy(GreedyStrategy):
@@ -50,9 +61,17 @@ class SoftMaxStrategy(GreedyStrategy):
         super().__init__(iterations)  # super init sets self.iterations
         self.anneal_mult = (self.min_temperature/self.temperature)**(1/iterations)
 
+    def getDoneTraining(self):
+        return self.temperature < self.min_temperature
+
     def getStrategyAction(self, action_q_values):
-        if self.temperature < self.min_temperature:
+        if self.getDoneTraining():
             return super().getStrategyAction(action_q_values)
         ret_val = random.choices(range(len(action_q_values)), [math.exp(q/self.temperature) for q in action_q_values])[0]
         self.temperature *= self.anneal_mult
         return ret_val
+
+    def getStrategyText(self):
+        if self.getDoneTraining():
+            return "Using greedy"
+        return "Temp = {} ".format(round(self.temperature,4))

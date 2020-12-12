@@ -64,7 +64,12 @@ class UI:
         cur_y -= 2
         textSurface = self.font.render(str(iter_val), 1, (255,255,255)) # white
         surface.blit(textSurface, (cur_x,cur_y))
+    def DrawSpeedIndicator(self,surface,state_delay):
+        speedText = " Speed: = {} ".format(round(1000/state_delay,1))
+        textSurface = self.font.render(speedText, 1, (255,255,255)) # white
+        surface.blit(textSurface, (0, self.window_y_len - 25))
     def DrawGame(self,window,game,lerp_alpha,iter_val):
         window.fill((0,0,0)) # this is required since IterNum text needs to be cleared
         self.DrawGameSurfaces(window,game,lerp_alpha)
         self.DrawProgressInfo(window,iter_val)
+        self.DrawSpeedIndicator(window,game.state_delay)

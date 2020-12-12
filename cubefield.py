@@ -162,7 +162,7 @@ def main(iterations = 2*DEFAULT_ITERATIONS):
     # initialize pygame
     pygame.init()
 
-    WINDOW_X_LEN = 1280
+    WINDOW_X_LEN = 1200 # 1280
     WINDOW_Y_LEN = 720
     mainwindow = pygame.display.set_mode((WINDOW_X_LEN,WINDOW_Y_LEN)) # this gets UI drawn on top
     mainui = ui.UI(game, DEFAULT_ITERATIONS, iterations, WINDOW_X_LEN, WINDOW_Y_LEN)

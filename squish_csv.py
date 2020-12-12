@@ -1,5 +1,3 @@
-import csv
-
 # example usage: squish_csv("trial_results.csv","squished_results.csv",3)
 #   this will keep 1/3 of the original rows
 def squish_csv(in_fname="input.csv",out_fname="squished_results.csv",skip=2):

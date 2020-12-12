@@ -38,9 +38,9 @@ class UI:
         total_width = 200
         total_height = 20
         separator_width = 10
-        training_bar_color = (255,255,255) # white
+        training_bar_color = (0,255,255) # cyan
         training_background_color = (128,128,128) # grey
-        testing_bar_color = (255,255,255) # white
+        testing_bar_color = (255,223,0) # golden yellow
         testing_background_color = (128,128,128) # grey
 
         training_alpha = clamp(iter_val/self.training_iterations)

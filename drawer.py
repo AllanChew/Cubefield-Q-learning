@@ -100,7 +100,7 @@ class Drawer:
 
     # draw total number of collisions onto the surface
     def DrawTotalCollisions(self, surface, total_collisions):
-        collisionStatement = " Total Collisions: " + str(total_collisions) + "  "
+        collisionStatement = " Total Collisions: " + str(total_collisions) + " "
         self.DrawText(surface, collisionStatement, (0, 297)) # bottom left
 
     def DrawStrategyText(self, surface, strategyText):

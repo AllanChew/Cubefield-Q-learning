@@ -49,7 +49,7 @@ class EpsilonGreedyStrategy(GreedyStrategy):
 
     def getStrategyText(self):
         if self.getDoneTraining():
-            return "Using greedy"
+            return " Using greedy "
         return " epsilon = {} ".format(round(self.epsilon,4))
 
 
@@ -73,5 +73,5 @@ class SoftMaxStrategy(GreedyStrategy):
 
     def getStrategyText(self):
         if self.getDoneTraining():
-            return "Using greedy"
-        return "Temp = {} ".format(round(self.temperature,4))
+            return " Using greedy "
+        return " Temp = {} ".format(round(self.temperature,4))
